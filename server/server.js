@@ -1,4 +1,5 @@
 require('dotenv').config()
+const pool = require("./db");
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -8,12 +9,21 @@ const morgan = require("morgan");
 
 
 app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true
 }));
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
+
+pool.getConnection()
+    .then((conn) => {
+        console.log("MySQL connected successfully");
+        conn.release();
+    })
+    .catch((err) => {
+        console.error("MySQL connection failed:", err.message);
+    });
 
 app.get("/", (req, res) => {
     res.json({

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import LandingPage from './pages/LandingPage'
 import axiosInstance from "./api/axiosInstance";
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 const App = () => {
 
