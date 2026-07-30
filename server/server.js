@@ -8,7 +8,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const { hashPassword } = require("./utils/hash");
-const { generateAccessToken, generateRefreshToken } = require("./utils/generateTokens");
+// const { generateAccessToken, generateRefreshToken } = require("./utils/generateTokens");
 
 app.use(morgan("dev"));
 app.use(express.json());
@@ -41,7 +41,7 @@ app.post("/register", async (req, res) => {
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if(!emailRegex.test(email)) {
+        if (!emailRegex.test(email)) {
             return res.status(400).json({
                 success: false,
                 message: "Enter a valid email"
@@ -74,21 +74,10 @@ app.post("/register", async (req, res) => {
 
         const [result] = await pool.query("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [username, email, hashedPassword]);
 
-        const payload = { id: result.insertId, username };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
-
         return res.status(201).json({
             success: true,
-            message: "User registered successfully",
-            accessToken,
-            user: { id: result.insertId, username, email },
+            message: "Account created. Please verify your email.",
+            userId: result.insertId,
         });
 
     } catch (error) {
@@ -100,6 +89,60 @@ app.post("/register", async (req, res) => {
     }
 });
 
+app.post("/set-security-questions", async (req, res) => {
+    try {
+
+        const { userId, questions } = req.body;
+
+        const [existingUser] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+        if (existingUser.length !== 1) {
+            return res.status(409).json({
+                success: false,
+                message: "User not Found",
+            });
+        }
+        if (questions.length !== 5) {
+            return res.status(409).json({
+                success: false,
+                message: "Question not found",
+            });
+        }
+
+        for (let i = 0; i < questions.length; i++) {
+            if (questions[i].question.trim() === "") {
+                return res.status(409).json({
+                    success: false,
+                    message: "Question not Found",
+                });
+            }
+            if (questions[i].answer.trim() === "") {
+                return res.status(409).json({
+                    success: false,
+                    message: `Fill the empty question (question number - ${i + 1}) correctly`,
+                });
+            }
+        }
+
+        for (const q of questions) {
+            const hashedAnswer = await hashPassword(q.answer);
+            await pool.query(
+                "INSERT INTO security_questions (user_id, question, answer_hash) VALUES (?, ?, ?)",
+                [userId, q.question, hashedAnswer]
+            );
+        }
+        return res.status(201).json({
+            success: true,
+            message: "Security questions saved successfully",
+        });
+        
+    } catch (error) {
+        console.error("Set-security-questions error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong, please try again",
+        });
+    }
+});
 
 app.listen(port, () => {
     console.log(`server running at port ${port}`);
