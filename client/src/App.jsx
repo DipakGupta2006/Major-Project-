@@ -1,34 +1,41 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import LandingPage from './pages/LandingPage'
-import axiosInstance from "./api/axiosInstance";
+// import axiosInstance from "./api/axiosInstance";
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 const App = () => {
 
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    const fetchMessage =  async () => {
-      try{
-        const res = await axiosInstance.get("/");
-        setMessage(res.data.message)
-      }
-      catch (err) {
-        console.error(err);
-      }
-    };
-    fetchMessage();
-
-  }, []);
-
-
   return (
     <div>
-      VaultX 2.0
-      <LandingPage/>
-      <p>hii = {message}</p>
+      
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
     </div>
   )
 }
 
 export default App;
+
+
+ // const [message, setMessage] = useState("");
+  // useEffect(() => {
+  //   const fetchMessage =  async () => {
+  //     try{
+  //       const res = await axiosInstance.get("/");
+  //       setMessage(res.data.message)
+  //     }
+  //     catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchMessage();
+  // }, []);
+{/* VaultX 2.0
+      <LandingPage/>
+      <p>hii = {message}</p> */}
+      
