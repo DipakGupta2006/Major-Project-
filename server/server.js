@@ -21,7 +21,6 @@ app.use(cors({
 }));
 
 
-
 app.get("/", (req, res) => {
     res.json({
         message: "Server is running",
@@ -32,12 +31,20 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, res) => {
     try {
-        const { username, email, password, confirm_password } = req.body;
+        const { username, email, password, confirm_password, accepted_terms } = req.body;
 
-        if (!username || !email || !password || !confirm_password) {
+        if (!username || !email || !password || !confirm_password || accepted_terms === false) {
             return res.status(400).json({
                 success: false,
                 message: "Enter a valid input"
+            });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid email"
             });
         }
 

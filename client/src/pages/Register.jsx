@@ -1,9 +1,72 @@
 import React from 'react'
+import { useState } from 'react'
+import axiosInstance from "../api/axiosInstance";
 
 const Register = () => {
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+    accepted_terms: false,
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.accepted_terms) {
+      alert("Please accept the Terms & Conditions");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    if (formData.password !== formData.confirm_password) {
+      alert("Password and Confirm Password do not match");
+      return;
+    }
+
+    try {
+      const res = await axiosInstance.post("/register", formData);
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div>
-      register
+
+      <form onSubmit={handleSubmit}>
+        Username:
+        <input type="text" name="username" onChange={handleChange} value={formData.username} id="" /><br />
+        Email:
+        <input type="email" name="email" onChange={handleChange} value={formData.email} id="" /><br />
+        password:
+        <input type="password" name="password" onChange={handleChange} value={formData.password} id="" /><br />
+        confirm_password:
+        <input type="password" name="confirm_password" onChange={handleChange} value={formData.confirm_password} id="" /><br />
+        TnC:
+        <input type="checkbox" name="accepted_terms" onChange={handleChange} checked={formData.accepted_terms} id="" /><br />
+
+        <input type="submit" value="submit" />
+
+      </form>
+
     </div>
   )
 }
