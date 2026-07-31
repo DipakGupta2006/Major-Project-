@@ -11,6 +11,7 @@ const { hashPassword } = require("./utils/hash");
 // const { generateAccessToken, generateRefreshToken } = require("./utils/generateTokens");
 const svgCaptcha = require("svg-captcha");
 const crypto = require("crypto");
+const { sendOtpEmail } = require('./utils/sendEmail');
 
 
 // all builtin middlewares
@@ -126,8 +127,6 @@ app.post("/register", async (req, res) => {
     }
 });
 
-
-
 app.post("/set-security-questions", async (req, res) => {
     try {
 
@@ -203,6 +202,101 @@ app.get("/captcha", (req, res) => {
         captchaId,
         svg: captcha.data,
     });
+});
+
+app.post("/send-otp", async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const [existingUser] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+        if (existingUser.length !== 1) {
+            return res.status(400).json({
+                success: false,
+                message: "User not exists",
+            });
+        }
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        await pool.query("DELETE FROM otp_tokens WHERE user_id = ?", [userId]);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        await pool.query(
+            "INSERT INTO otp_tokens (user_id, otp, expires_at) VALUES (?, ?, ?)",
+            [userId, otp, expiresAt]
+        );
+
+        const userEmail = existingUser[0].email;
+        await sendOtpEmail(userEmail, otp);
+
+        return res.status(201).json({
+            success: true,
+            message: "OTP send sucessfully",
+        });
+
+    } catch (error) {
+        console.error("Send OTP error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+        });
+    }
+});
+
+app.post("/verify-otp", async (req, res) => {
+    try {
+        const { userId, otp } = req.body;
+
+        if (!userId || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "userId and OTP are required",
+            });
+        }
+
+        const otpString = String(otp);
+
+        const [rows] = await pool.query(
+            "SELECT * FROM otp_tokens WHERE user_id = ?",
+            [userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP not found, please request a new one",
+            });
+        }
+
+        const otpRecord = rows[0];
+
+        if (new Date() > new Date(otpRecord.expires_at)) {
+            await pool.query("DELETE FROM otp_tokens WHERE user_id = ?", [userId]);
+            return res.status(400).json({
+                success: false,
+                message: "OTP expired, please request a new one",
+            });
+        }
+
+        if (otpRecord.otp !== otpString) {
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect OTP",
+            });
+        }
+
+        await pool.query("UPDATE users SET is_verified = TRUE WHERE id = ?", [userId]);
+        await pool.query("DELETE FROM otp_tokens WHERE user_id = ?", [userId]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully",
+        });
+
+    } catch (error) {
+        console.error("Verify OTP error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+        });
+    }
 });
 
 
