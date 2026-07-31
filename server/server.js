@@ -8,7 +8,8 @@ const cors = require("cors");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const { hashPassword } = require("./utils/hash");
-// const { generateAccessToken, generateRefreshToken } = require("./utils/generateTokens");
+const { comparePassword } = require("./utils/hash");
+const { generateAccessToken, generateRefreshToken } = require("./utils/generateTokens");
 const svgCaptcha = require("svg-captcha");
 const crypto = require("crypto");
 const { sendOtpEmail } = require('./utils/sendEmail');
@@ -90,7 +91,7 @@ app.post("/register", async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters"
-            })
+            });
         }
 
         if (password !== confirm_password) {
@@ -299,6 +300,125 @@ app.post("/verify-otp", async (req, res) => {
     }
 });
 
+app.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid inputs",
+            });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid email"
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters"
+            });
+        }
+
+        const [existingUser] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
+        if (existingUser.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+        }
+
+        const user = existingUser[0];
+
+        if (user.locked_until && new Date() < new Date(user.locked_until)) {
+            const remainingMs = new Date(user.locked_until) - new Date();
+            const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+
+            return res.status(403).json({
+                success: false,
+                message: `Account locked, try again after ${remainingMinutes} minute(s)`,
+            });
+        }
+
+        if (user.is_verified === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Please verify your email first",
+            });
+        }
+
+        const isPasswordCorrect = await comparePassword(password, user.password_hash);
+
+        if (!isPasswordCorrect) {
+            await pool.query(
+                "UPDATE users SET failed_attempts = failed_attempts + 1 WHERE email = ?",
+                [email]
+            );
+
+            const [rows] = await pool.query(
+                "SELECT failed_attempts FROM users WHERE email = ?",
+                [email]
+            );
+            const currentAttempts = rows[0].failed_attempts;
+
+            if (currentAttempts >= 3) {
+                const lockUntil = new Date(Date.now() + 5 * 60 * 1000); // abhi + 5 min
+
+                await pool.query(
+                    "UPDATE users SET locked_until = ?, failed_attempts = 0 WHERE email = ?",
+                    [lockUntil, email]
+                );
+
+                return res.status(403).json({
+                    success: false,
+                    message: "Too many failed attempts. Account locked for 5 minutes.",
+                });
+            }
+
+            return res.status(400).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+        }
+
+        // password sahi hai
+        await pool.query(
+            "UPDATE users SET failed_attempts = 0, last_login = NOW() WHERE email = ?",
+            [email]
+        );
+
+        const payload = { id: user.id, username: user.username };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            accessToken,
+            user: { id: user.id, username: user.username, email: user.email },
+        });
+
+    } catch (error) {
+        console.error("Login error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+        });
+    }
+});
 
 app.listen(port, () => {
     console.log(`server running at port ${port}`);
