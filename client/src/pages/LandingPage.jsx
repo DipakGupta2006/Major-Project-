@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 const dialNumbers = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195];
 
 const features = [
@@ -278,17 +279,12 @@ const LandingPage = () => {
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
 
-            <a href="/register"
-              className="px-6 py-3 rounded-sm bg-[#C9A227] text-[#0B0F14] font-medium hover:bg-[#dbb537] transition-colors"
-            >
-              Get started
-            </a>
+            
+            <Link to="/register" className="px-6 py-3 rounded-sm bg-[#C9A227] text-[#0B0F14] font-medium hover:bg-[#dbb537] transition-colors"
+            >Get started</Link>
 
-            <a href="/login"
-              className="px-6 py-3 rounded-sm border border-white/15 hover:border-white/30 transition-colors"
-            >
-              I have an account
-            </a>
+           <Link to="/login" className="px-6 py-3 rounded-sm border border-white/15 hover:border-white/30 transition-colors"
+            >I have an account</Link>
           </div>
         </div >
       </section >

@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000;
 const cors = require("cors");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+
 const authRoutes = require("./routes/authRoutes");
 
 app.use(morgan("dev"));

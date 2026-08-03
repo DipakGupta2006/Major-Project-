@@ -4,6 +4,8 @@ import LandingPage from './pages/LandingPage'
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Tnc from './pages/Tnc';
+import VerifyOtp from './pages/VerifyOtp';
 
 const App = () => {
 
@@ -14,6 +16,8 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/tnc" element={<Tnc />} />
+        <Route path="/verify-otp" element={<VerifyOtp/>}/>
 
       </Routes>
     </div>
