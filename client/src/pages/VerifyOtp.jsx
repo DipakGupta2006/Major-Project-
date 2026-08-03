@@ -62,7 +62,7 @@ const VerifyOtp = () => {
                     </div>
                     <h1 className="font-['Fraunces'] text-3xl mb-2">Verify your email</h1>
                     <p className="text-[#8B94A0] text-sm">
-                        Enter the 6-digit code we sent to your email address.
+                        Enter the 6-digit code we sent to your registered email address.
                     </p>
                 </div>
 
