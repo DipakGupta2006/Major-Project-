@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import Tnc from './pages/Tnc';
 import VerifyOtp from './pages/VerifyOtp';
 import SecurityQuestions from './pages/SecurityQuestions';
+import Home from './pages/Home';
+import PrivateRoute from './routes/PrivateRoute';
 
 
 const App = () => {
@@ -21,6 +23,12 @@ const App = () => {
         <Route path="/tnc" element={<Tnc />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/set-security-questions" element={<SecurityQuestions />} />
+
+        <Route path="/home" element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        } />
 
       </Routes>
     </div>

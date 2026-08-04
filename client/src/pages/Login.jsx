@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
-
+import { useAuth } from '../context/AuthContext';
+import LandingPageLogo from '../components/LandingPageLogo';
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -30,9 +32,7 @@ const Login = () => {
       const res = await axiosInstance.post("/login", formData);
 
       if (res.data.success) {
-        // abhi ke liye temporary storage, AuthContext banne ke baad isko refactor karenge
-        localStorage.setItem("accessToken", res.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        login(res.data.user, res.data.accessToken);
         navigate("/home");
       }
     } catch (err) {
@@ -48,7 +48,7 @@ const Login = () => {
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full bg-[#C9A227]" />
-            <span className="font-['Fraunces'] text-xl tracking-wide">VaultX</span>
+<LandingPageLogo/>
           </div>
           <h1 className="font-['Fraunces'] text-3xl mb-2">Welcome back</h1>
           <p className="text-[#8B94A0] text-sm">
