@@ -152,6 +152,42 @@ const loginUser = async (req, res) => {
             });
         }
 
+        if (existingUser[0].is_verified === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Please verify your email first",
+                code: "EMAIL_NOT_VERIFIED",
+                userId: existingUser[0].id,
+            });
+        }
+
+        if (existingUser[0].has_master_password === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Please set your master password first",
+                code: "MASTER_PASSWORD_NOT_SET",
+                userId: existingUser[0].id,
+            });
+        }
+
+        if (existingUser[0].master_password_hash === null) {
+            return res.status(400).json({
+                success: false,
+                message: "Please set your master password first",
+                code: "MASTER_PASSWORD_NOT_SET",
+                userId: existingUser[0].id,
+            });
+        }
+
+        if(existingUser[0].has_master_password === 0 || existingUser[0].master_password_hash === null) {
+            return res.status(400).json({
+                success: false,
+                message: "Please set your master password first",
+                code: "MASTER_PASSWORD_NOT_SET",
+                userId: existingUser[0].id,
+            });
+        }
+
         const user = existingUser[0];
 
         if (user.locked_until && new Date() < new Date(user.locked_until)) {
@@ -168,6 +204,8 @@ const loginUser = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Please verify your email first",
+                code: "EMAIL_NOT_VERIFIED",
+                userId: user.id,
             });
         }
 
@@ -334,7 +372,7 @@ const verifyOtp = async (req, res) => {
 };
 
 const setSecurityQuestions = async (req, res) => {
-try {
+    try {
 
         const { userId, questions } = req.body;
 
@@ -385,7 +423,61 @@ try {
             success: false,
             message: "Something went wrong, please try again",
         });
-    }};
+    }
+};
+
+const setMasterPassword = async (req, res) => {
+    try {
+        const { userId, masterPassword, confirmMasterPassword } = req.body;
+
+        // step 1: validation — userId, masterPassword, confirmMasterPassword teeno aaye?
+        if (!userId || !masterPassword || !confirmMasterPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
+
+        // step 2: length check — kam se kam 8 characters
+        if (masterPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Master password must be at least 8 characters long",
+            });
+        }
+
+        // step 3: dono match karte hai?
+        if (masterPassword !== confirmMasterPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Master passwords do not match",
+            });
+        }
+
+        // step 4: hash karo (hashPassword use karo)
+        const hashedMasterPassword = await hashPassword(masterPassword);
+
+        // step 5: DB update karo
+        // "UPDATE users SET master_password_hash = ?, has_master_password = TRUE WHERE id = ?"
+        await pool.query(
+            "UPDATE users SET master_password_hash = ?, has_master_password = TRUE WHERE id = ?",
+            [hashedMasterPassword, userId]
+        );
+
+        // step 6: success response
+        return res.status(200).json({
+            success: true,
+            message: "Master password set successfully",
+        });
+
+    } catch (error) {
+        console.error("Set master password error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+        });
+    }
+};
 
 module.exports = {
     getCaptcha,
@@ -394,4 +486,5 @@ module.exports = {
     sendOtp,
     verifyOtp,
     setSecurityQuestions,
+    setMasterPassword,
 };

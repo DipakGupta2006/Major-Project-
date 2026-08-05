@@ -15,6 +15,7 @@ const {
     verifyOtp,
     setSecurityQuestions,
     getCaptcha,
+    setMasterPassword,
 } = require("../controllers/authController");
 
 router.get("/captcha", getCaptcha);
@@ -23,5 +24,6 @@ router.post("/login", loginUser);
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
 router.post("/set-security-questions", setSecurityQuestions);
+router.post("/set-master-password", setMasterPassword);
 
 module.exports = router;

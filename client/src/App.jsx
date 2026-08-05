@@ -9,6 +9,7 @@ import VerifyOtp from './pages/VerifyOtp';
 import SecurityQuestions from './pages/SecurityQuestions';
 import Home from './pages/Home';
 import PrivateRoute from './routes/PrivateRoute';
+import SetMasterPassword from './pages/SetMasterPassword';
 
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/tnc" element={<Tnc />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/set-security-questions" element={<SecurityQuestions />} />
+        <Route path="/set-master-password" element={<SetMasterPassword />} />
 
         <Route path="/home" element={
           <PrivateRoute>

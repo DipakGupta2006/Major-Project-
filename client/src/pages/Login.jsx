@@ -48,7 +48,7 @@ const Login = () => {
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full bg-[#C9A227]" />
-<LandingPageLogo/>
+            <LandingPageLogo />
           </div>
           <h1 className="font-['Fraunces'] text-3xl mb-2">Welcome back</h1>
           <p className="text-[#8B94A0] text-sm">
@@ -108,3 +108,9 @@ const Login = () => {
 };
 
 export default Login;
+
+// meko apne project me ek change, user abhi kya kar rha hai-
+// register - > email verify -> then security quest -> login to meko issme ek ye change karna hai ki jab user security quest dede tab uske baad set master password ka page khule (login se pehle) fir user matser paswd dale, confirm kare fir login kare.
+// to flow kuch aesa ho
+// register - > email verify -> then security quest -> set master paswd -> login -> home page
+// aur master pawd ke page pe ye likha hoga ki ye paswd user q set kar rha hai mendetory q hai ye

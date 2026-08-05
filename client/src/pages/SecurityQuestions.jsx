@@ -61,7 +61,7 @@ const SecurityQuestions = () => {
 
     try {
       await axiosInstance.post("/set-security-questions", { userId, questions });
-      navigate("/login");
+      navigate("/set-master-password", { state: { userId: userId } });
     } catch (err) {
       setErrorMsg(err.response?.data?.message || "Something went wrong, please try again");
     }
