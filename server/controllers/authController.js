@@ -161,25 +161,16 @@ const loginUser = async (req, res) => {
             });
         }
 
-        if (existingUser[0].has_master_password === 0) {
+        if (existingUser[0].has_security_questions === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Please set your master password first",
-                code: "MASTER_PASSWORD_NOT_SET",
+                message: "Please set your security questions first",
+                code: "SECURITY_QUESTIONS_NOT_SET",
                 userId: existingUser[0].id,
             });
         }
 
-        if (existingUser[0].master_password_hash === null) {
-            return res.status(400).json({
-                success: false,
-                message: "Please set your master password first",
-                code: "MASTER_PASSWORD_NOT_SET",
-                userId: existingUser[0].id,
-            });
-        }
-
-        if(existingUser[0].has_master_password === 0 || existingUser[0].master_password_hash === null) {
+        if (existingUser[0].has_master_password === 0 || existingUser[0].master_password_hash === null) {
             return res.status(400).json({
                 success: false,
                 message: "Please set your master password first",
@@ -412,6 +403,11 @@ const setSecurityQuestions = async (req, res) => {
                 [userId, q.question, hashedAnswer]
             );
         }
+        // security questions save hone ke baad ye bhi update karo
+        await pool.query(
+            "UPDATE users SET has_security_questions = TRUE WHERE id = ?",
+            [userId]
+        );
         return res.status(201).json({
             success: true,
             message: "Security questions saved successfully",

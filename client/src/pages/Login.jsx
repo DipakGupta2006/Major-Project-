@@ -1,11 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axiosInstance from '../api/axiosInstance'
 import { useAuth } from '../context/AuthContext';
 import LandingPageLogo from '../components/LandingPageLogo';
+
+
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  // const { login } = useAuth();
+
+  const { login, logout, accessToken } = useAuth();  // logout bhi lo
+  useEffect(() => {
+    if (accessToken) {
+      logout();  // token delete, state clear
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -13,6 +22,8 @@ const Login = () => {
   });
 
   const [errorMsg, setErrorMsg] = useState("");
+  const [errorCode, setErrorCode] = useState("");
+  const [errorUserId, setErrorUserId] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -36,7 +47,10 @@ const Login = () => {
         navigate("/home");
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Something went wrong, please try again");
+      const data = err.response?.data;
+      setErrorMsg(data?.message || "Something went wrong");
+      setErrorCode(data?.code || "");
+      setErrorUserId(data?.userId || null);
     } finally {
       setLoading(false);
     }
@@ -58,8 +72,35 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="bg-[#131A22] border border-white/10 rounded-sm p-8 space-y-5">
           {errorMsg && (
-            <div className="text-sm text-[#e07a5f] bg-[#e07a5f]/10 border border-[#e07a5f]/30 rounded-sm px-4 py-3">
-              {errorMsg}
+            <div className="text-sm text-[#e07a5f] bg-[#e07a5f]/10 border border-[#e07a5f]/30 rounded-sm px-4 py-3 space-y-2">
+              <p>{errorMsg}</p>
+
+              {errorCode === "EMAIL_NOT_VERIFIED" && (
+                <button
+                  onClick={() => navigate("/verify-otp", { state: { userId: errorUserId } })}
+                  className="text-[#C9A227] underline text-xs"
+                >
+                  → Click here to verify your email
+                </button>
+              )}
+
+              {errorCode === "SECURITY_QUESTIONS_NOT_SET" && (
+                <button
+                  onClick={() => navigate("/security-questions", { state: { userId: errorUserId } })}
+                  className="text-[#C9A227] underline text-xs"
+                >
+                  → Click here to set security questions
+                </button>
+              )}
+
+              {errorCode === "MASTER_PASSWORD_NOT_SET" && (
+                <button
+                  onClick={() => navigate("/set-master-password", { state: { userId: errorUserId } })}
+                  className="text-[#C9A227] underline text-xs"
+                >
+                  → Click here to set master password
+                </button>
+              )}
             </div>
           )}
 
