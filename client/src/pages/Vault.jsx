@@ -1,9 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 const Vault = () => {
   return (
     <div>
-      Vault
+      <Navbar/>
+      see all pswd
     </div>
   )
 }

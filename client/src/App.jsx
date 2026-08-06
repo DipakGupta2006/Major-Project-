@@ -10,6 +10,15 @@ import SecurityQuestions from './pages/SecurityQuestions';
 import Home from './pages/Home';
 import PrivateRoute from './routes/PrivateRoute';
 import SetMasterPassword from './pages/SetMasterPassword';
+import Create from './pages/Create';
+import Vault from './pages/Vault';
+import Trash from './pages/Trash';
+import Restore from './pages/Restore';
+import Collections from './pages/Collections';
+import Starred from './pages/Starred';
+import Insights from './pages/Insights';
+import Lab from './pages/Lab';
+import Account from './pages/Account';
 
 
 const App = () => {
@@ -26,11 +35,18 @@ const App = () => {
         <Route path="/security-questions" element={<SecurityQuestions />} />
         <Route path="/set-master-password" element={<SetMasterPassword />} />
 
-        <Route path="/home" element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        } />
+        <Route path="/home" element={ <PrivateRoute> <Home /> </PrivateRoute> } />
+        <Route path="/create" element={ <PrivateRoute> <Create /> </PrivateRoute> } />
+        <Route path="/vault" element={ <PrivateRoute> <Vault /> </PrivateRoute> } />
+        <Route path="/trash" element={ <PrivateRoute> <Trash /> </PrivateRoute> } />
+        <Route path="/restore" element={ <PrivateRoute> <Restore /> </PrivateRoute> } />
+        <Route path="/collections" element={ <PrivateRoute> <Collections /> </PrivateRoute> } />
+        <Route path="/starred" element={ <PrivateRoute> <Starred /> </PrivateRoute> } />
+        <Route path="/insights" element={ <PrivateRoute> <Insights /> </PrivateRoute> } />
+        <Route path="/lab" element={ <PrivateRoute> <Lab /> </PrivateRoute> } />
+        <Route path="/account" element={ <PrivateRoute> <Account /> </PrivateRoute> } />
+        
+
 
       </Routes>
     </div>

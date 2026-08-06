@@ -1,9 +1,12 @@
 import React from 'react'
+import Navbar from '../components/Navbar';
+import { Link } from 'react-router-dom';
 
 const Create = () => {
   return (
     <div>
-      Create
+      <Navbar/>
+      create
     </div>
   )
 }

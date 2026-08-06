@@ -1,9 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 const Insights = () => {
   return (
     <div>
-      Insights
+      <Navbar/>
+      all Insights passweord
     </div>
   )
 }

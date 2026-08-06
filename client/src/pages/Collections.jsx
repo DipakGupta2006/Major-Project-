@@ -1,9 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 const Collections = () => {
   return (
     <div>
-      Collections
+      <Navbar/>
+      all Collections password 
     </div>
   )
 }

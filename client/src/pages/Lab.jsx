@@ -1,9 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 const Lab = () => {
   return (
     <div>
-      Lab
+      <Navbar/>
+      generate a new passweord
     </div>
   )
 }
