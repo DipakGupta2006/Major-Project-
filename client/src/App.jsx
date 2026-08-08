@@ -54,21 +54,3 @@ const App = () => {
 }
 
 export default App;
-
-
-// const [message, setMessage] = useState("");
-// useEffect(() => {
-//   const fetchMessage =  async () => {
-//     try{
-//       const res = await axiosInstance.get("/");
-//       setMessage(res.data.message)
-//     }
-//     catch (err) {
-//       console.error(err);
-//     }
-//   };
-//   fetchMessage();
-// }, []);
-{/* VaultX 2.0
-      <LandingPage/>
-      <p>hii = {message}</p> */}
